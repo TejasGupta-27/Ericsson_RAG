@@ -1,24 +1,25 @@
 import nltk
 from nltk.tokenize import sent_tokenize
 from PyPDF2 import PdfReader
+from io import BytesIO
+from docx import Document
 
 nltk.download('punkt')
 
-def extract_text_from_pdf(pdf_path):
-    reader = PdfReader(pdf_path)
+def extract_text_from_pdf(pdf_file):
+    reader = PdfReader(pdf_file)
     text = ''
     for page in reader.pages:
         text += page.extract_text() + '\n'
     return text
 
-def extract_text_from_txt(txt_path):
-    with open(txt_path, 'r', encoding='utf-8') as f:
+def extract_text_from_txt(txt_file_path):
+    with open(txt_file_path, 'r', encoding='utf-8') as f:
         text = f.read()
     return text
 
-
-def extract_text_from_docx(docx_path):
-    doc = Document(docx_path)
+def extract_text_from_docx(docx_file):
+    doc = Document(docx_file)
     paragraphs = [paragraph.text for paragraph in doc.paragraphs]
     text = '\n'.join(paragraphs)
     return text
