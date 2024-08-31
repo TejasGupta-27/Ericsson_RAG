@@ -1,111 +1,88 @@
-# database_handler.py
-import os
-import sqlite3
-import google.generativeai as genai
-from dotenv import load_dotenv
-load_dotenv()
-api_key=os.getenv("GOOGLE_API_KEY")
-genai.configure(api_key=api_key)
-model = genai.GenerativeModel('gemini-1.5-flash')
+# RAG
 
-# System prompt for the Gemini model
-system_prompt = """
-I have an sqlite database with the following tables and columns:
+RAG is a Streamlit-based application that allows users to interact with document databases using a conversational interface. The application supports uploading documents, extracting embeddings for efficient querying, and generating responses in real-time.
 
-Table name: RatePlan
-Columns:
-RatePlanId INTEGER PRIMARY KEY
-Name VARCHAR(255)
-MonthlyFee FLOAT
-CallRate FLOAT
-SmsRate FLOAT
-DataRate FLOAT
+## Features
 
+- **Document Upload**: Supports PDF, DOCX, and TXT file uploads.
+- **Embedding Storage**: Automatically processes uploaded documents and stores embeddings for efficient querying.
+- **Real-Time Conversational Interface**: Allows users to query the document database and receive responses in a streaming, conversational manner.
+- **Session Management**: Maintains chat history and handles file uploads within the session.
+- **SQL Integration**: Integrates SQL databases, allowing dynamic SQL querying and natural language queries to interact with the database.
 
-Table name: Customer
-Columns:
-CustomerId INTEGER PRIMARY KEY
-FirstName VARCHAR(255)
-LastName VARCHAR(255)
-Address VARCHAR(255)
-City VARCHAR(255)
-State VARCHAR(255)
-Country VARCHAR(255)
-PostalCode VARCHAR(255)
-Phone VARCHAR(255)
-Email VARCHAR(255)
-RatePlanId INT
-ContractStart DATE
-ContractEnd DATE
+## Installation
 
-Foreign Keys:
-Foreign key: RatePlanId references RatePlanId(NO ACTION)
+### Prerequisites
 
-Table name: Phone
-Columns:
-PhoneId INTEGER PRIMARY KEY
-Brand VARCHAR(255)
-Model VARCHAR(255)
-OS VARCHAR(255)
-Price FLOAT
+- Python 3.8 or higher
+- Virtual environment tool (optional but recommended)
 
-Table name: CustomerPhone
-Columns:
-CustomerPhoneId INTEGER PRIMARY KEY
-CustomerId INT
-PhoneId INT
-PhoneAcquisitionDate DATE
+### Setup
 
-Foreign Keys:
-Foreign key: PhoneId references PhoneId(NO ACTION)
-Foreign key: CustomerId references CustomerId(NO ACTION)
+1. **Clone the Repository:**
 
-Table name: CDR
-Columns:
-CdrId INTEGER PRIMARY KEY
-CustomerId INT
-PhoneNumber VARCHAR(255)
-CallDateTime DATETIME
-CallType VARCHAR(255)
-DurationInSeconds INT
-DataUsageKb INT
-SmsCount INT
+    ```bash
+    git clone https://github.com/TejasGupta-27/RAG.git
+    cd RAG
+    ```
 
-Foreign Keys:
-Foreign key: CustomerId references CustomerId(NO ACTION)
+2. **Create and Activate a Virtual Environment:**
 
-I will need you to help me generate SQL queries to get data from my database.
-Please respond only with the query in simple text format. Do not provide any explanations or additional text.
+    ```bash
+    python -m venv venv
+    source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+    ```
 
-If the user tries to modify the database respond with 'ERROR: cannot modify db'
-"""
+3. **Install Dependencies:**
 
-# Initialize chat with system prompt
-model = genai.GenerativeModel('gemini-1.5-flash')
-chat = model.start_chat(history=[])
-chat.send_message(system_prompt)
+    ```bash
+    pip install -r requirements.txt
+    ```
 
-def generate_sql_query(prompt):
-    response = chat.send_message(prompt)
-    sql_query = response.text.strip()
-    sql_query = sql_query.replace('```sql', '').replace('```', '').strip()
-    print(sql_query)
-    return sql_query
+4. **Run the Application:**
 
-def fetch_data_from_db(sql_query, db_path='/media/tejas/b25dc664-2aec-424c-8f6c-f895bbec7e5d/Ericsson_RAG/call_db.sqlite'):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+    ```bash
+    streamlit run ui.py
+    ```
+
+    - Access the Interface: Open your web browser and go to [http://localhost:8501](http://localhost:8501).
+
+## Usage
+
+### Uploading Documents
+
+- **Navigate to the Sidebar:**
+  - Click the "Browse files" button under the "Upload a File" section.
+  - Select your PDF, DOCX, or TXT file.
+
+- **Automatic Processing:**
+  - The document will be automatically processed, and embeddings will be stored.
+
+- **Querying the Database:**
+  - Enter your query in the text input field in the sidebar.
+  - Click "Send" to submit your query.
+  - The bot will respond in the main chat area with relevant information extracted from the uploaded documents.
+
+### Viewing Chat History
+
+- The chat history will be displayed in the main conversation area, showing both user queries and bot responses.
+
+## Project Structure
+
+├── data/                          # Directory for temporary files
+│   └── temp/                      # Temporary storage for uploaded files
+├── preprocessing.py               # Script for document text extraction and chunking
+├── rag_pipeline.py                # Script for generating responses and storing embeddings
+├── ui.py                          # Main Streamlit application
+├── database_handler.py            # Script for handling database queries and interactions
+├── logo.png                       # Logo image displayed in the sidebar
+├── requirements.txt               # Python dependencies
+└── README.md                      # Project documentation
 
 
-    cursor.execute(sql_query)
-    results = cursor.fetchall()
-    columns = [description[0] for description in cursor.description]
-    conn.close()
-    return columns, results
+## Future Enhancements
 
-def format_results_as_table(columns, results):
-    table = [columns]
-    table.extend(results)
-    return table
-
+- **Enhanced Query Expansion**: Implement more advanced query expansion techniques to improve document retrieval accuracy.
+- **Multi-Language Support**: Add support for processing and querying documents in multiple languages.
+- **User Authentication**: Introduce user authentication to manage document access and interaction history.
 
