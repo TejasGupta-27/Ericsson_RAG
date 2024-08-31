@@ -71,7 +71,7 @@ RAG is a Streamlit-based application that allows users to interact with document
 ├── preprocessing.py               # Script for document text extraction and chunking
 ├── rag_pipeline.py                # Script for generating responses and storing embeddings
 ├── ui.py                          # Main Streamlit application
-├── ericsson_logo.png              # Ericsson logo image displayed in the sidebar
+├── logo.png                       # Logo image displayed in the sidebar
 ├── requirements.txt               # Python dependencies
 └── README.md                      # Project documentation
 Future Enhancements
